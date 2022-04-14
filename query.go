@@ -11,12 +11,12 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
 
-const redirectURI = "http://localhost:27228/spotify_callback"
+const redirectURI = "http://localhost:8080/callback"
 
 var (
 	auth  = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI), spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate))
 	ch    = make(chan *spotify.Client)
-	state = "hoge"
+	state = "abc123"
 )
 
 func executeQuery(c *cli.Context) error {
