@@ -4,68 +4,53 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
+	"os"
 
 	"github.com/urfave/cli/v2"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
-)
-
-const redirectURI = "http://localhost:8080/callback"
-
-var (
-	auth  = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI), spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate))
-	ch    = make(chan *spotify.Client)
-	state = "abc123"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 func executeQuery(c *cli.Context) error {
-	var args = c.Args().Slice()
-	if len(args) == 0 {
-		return fmt.Errorf("no target args specified. see `spq query -h` for more details")
-	} else if len(args) > 1 {
-		return fmt.Errorf("too many args specified. see `spq query -h` for more details")
+	ctx := context.Background()
+	config := &clientcredentials.Config{
+		ClientID:     os.Getenv("SPOTIFY_ID"),
+		ClientSecret: os.Getenv("SPOTIFY_SECRET"),
+		TokenURL:     spotifyauth.TokenURL,
 	}
-	query()
-	return nil
-}
+	token, err := config.Token(ctx)
+	if err != nil {
+		log.Fatalf("couldn't get token: %v", err)
+	}
 
-func query() {
-	http.HandleFunc("/callback", completeAuth)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go func() {
-		err := http.ListenAndServe(":8080", nil)
-		if err != nil {
-			log.Fatal(err)
+	httpClient := spotifyauth.New().Client(ctx, token)
+	client := spotify.New(httpClient)
+
+	// parse flags
+	artist := c.String("artist")
+	//album := c.String("album")
+	//track := c.String("track")
+	//queryString := artist + " " + album + " " + track
+
+	results, err := client.Search(ctx, artist, spotify.SearchTypeArtist|spotify.SearchTypeAlbum|spotify.SearchTypeTrack)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// handle album results
+	if results.Albums != nil {
+		fmt.Println("Albums:")
+		for _, item := range results.Albums.Albums {
+			fmt.Println("   ", item.Name)
 		}
-	}()
-	url := auth.AuthURL(state)
-	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
-
-	client := <-ch
-
-	user, err := client.CurrentUser(context.Background())
-	if err != nil {
-		log.Fatal(err)
 	}
-	fmt.Println("You are logged in as:", user.ID)
-}
-
-func completeAuth(w http.ResponseWriter, r *http.Request) {
-	tok, err := auth.Token(r.Context(), state, r)
-	if err != nil {
-		http.Error(w, "Couldn't get token", http.StatusForbidden)
-		log.Fatal(err)
+	// handle playlist results
+	if results.Tracks != nil {
+		fmt.Println("Tracks:")
+		for _, item := range results.Tracks.Tracks {
+			fmt.Println("   ", item.Name)
+		}
 	}
-	if st := r.FormValue("state"); st != state {
-		http.NotFound(w, r)
-		log.Fatalf("State mismatch: %s != %s\n", st, state)
-	}
-
-	// use the token to get an authenticated client
-	client := spotify.New(auth.Client(r.Context(), tok))
-	fmt.Fprintf(w, "Login Completed!")
-	ch <- client
+	return nil
 }
