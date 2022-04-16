@@ -31,7 +31,6 @@ func executeQuery(c *cli.Context) error {
 	artist := c.String("artist")
 	//album := c.String("album")
 	//track := c.String("track")
-	//queryString := artist + " " + album + " " + track
 
 	results, err := client.Search(ctx, artist, spotify.SearchTypeArtist|spotify.SearchTypeAlbum|spotify.SearchTypeTrack)
 	if err != nil {
