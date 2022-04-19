@@ -33,7 +33,7 @@ var searchAlbums = &cli.Command{
 }
 
 var searchTracks = &cli.Command{
-	Name:   "artist",
+	Name:   "track",
 	Usage:  "search track by keyword",
 	Action: executeQuery,
 	Flags: []cli.Flag{
