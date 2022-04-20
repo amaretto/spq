@@ -38,17 +38,37 @@ func executeQuery(c *cli.Context) error {
 
 	qs := args[0]
 
+	var results *spotify.SearchResult
+
 	// ToDo change kind by specified command
-	results, err := client.Search(ctx, qs, spotify.SearchTypeArtist|spotify.SearchTypeAlbum|spotify.SearchTypeTrack)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if results.Artists != nil {
+	if c.Command.Name == "artist" {
+		results, err = client.Search(ctx, qs, spotify.SearchTypeArtist)
+		if err != nil {
+			log.Fatal(err)
+		}
 		fmt.Println("Artists:")
 		for _, item := range results.Artists.Artists {
 			fmt.Println("    ", item.Name)
 		}
-	}
+	} else if c.Command.Name == "album" {
+		results, err = client.Search(ctx, qs, spotify.SearchTypeAlbum)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Albums:")
+		for _, item := range results.Albums.Albums {
+			fmt.Println("    ", item.Name)
+		}
+	} else {
+		results, err = client.Search(ctx, qs, spotify.SearchTypeTrack)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Tracks")
+		for _, item := range results.Tracks.Tracks {
+			fmt.Println("    ", item.Name)
+		}
 
+	}
 	return nil
 }
