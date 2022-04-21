@@ -15,7 +15,12 @@ var searchArtists = &cli.Command{
 		{
 			Name:   "list",
 			Usage:  "list search results",
-			Action: listQuery,
+			Action: listArtist,
+		},
+		{
+			Name:   "describe",
+			Usage:  "list search results",
+			Action: describeArtist,
 		},
 	},
 }

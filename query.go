@@ -12,7 +12,9 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-func executeQuery(c *cli.Context) error {
+var client *spotify.Client
+
+func getClient() error {
 	// authorizaiton
 	ctx := context.Background()
 	config := &clientcredentials.Config{
@@ -26,7 +28,15 @@ func executeQuery(c *cli.Context) error {
 	}
 
 	httpClient := spotifyauth.New().Client(ctx, token)
-	client := spotify.New(httpClient)
+	client = spotify.New(httpClient)
+	return nil
+}
+
+func executeQuery(c *cli.Context) error {
+	ctx := context.Background()
+	if err := getClient(); err != nil {
+		return err
+	}
 
 	// check args
 	var args = c.Args().Slice()
@@ -38,19 +48,8 @@ func executeQuery(c *cli.Context) error {
 
 	qs := args[0]
 
-	var results *spotify.SearchResult
-
-	if c.Command.Name == "artist" {
-		results, err = client.Search(ctx, qs, spotify.SearchTypeArtist)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Artists:")
-		for _, item := range results.Artists.Artists {
-			fmt.Println("    ", item.Name)
-		}
-	} else if c.Command.Name == "album" {
-		results, err = client.Search(ctx, qs, spotify.SearchTypeAlbum)
+	if c.Command.Name == "album" {
+		results, err := client.Search(ctx, qs, spotify.SearchTypeAlbum)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -59,7 +58,7 @@ func executeQuery(c *cli.Context) error {
 			fmt.Println("    ", item.Name)
 		}
 	} else {
-		results, err = client.Search(ctx, qs, spotify.SearchTypeTrack)
+		results, err := client.Search(ctx, qs, spotify.SearchTypeTrack)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -72,8 +71,15 @@ func executeQuery(c *cli.Context) error {
 	return nil
 }
 
-func listArtist(client spotify.Client, qs string) {
+func listArtist(c *cli.Context) error {
 	ctx := context.Background()
+	if err := getClient(); err != nil {
+		return err
+	}
+	var args = c.Args().Slice()
+	//ToDo: check arg length
+
+	qs := args[0]
 	results, err := client.Search(ctx, qs, spotify.SearchTypeArtist)
 	if err != nil {
 		log.Fatal(err)
@@ -82,5 +88,29 @@ func listArtist(client spotify.Client, qs string) {
 	for _, item := range results.Artists.Artists {
 		fmt.Println("    ", item.Name)
 	}
+	return nil
+}
 
+func describeArtist(c *cli.Context) error {
+	ctx := context.Background()
+	if err := getClient(); err != nil {
+		return err
+	}
+	var args = c.Args().Slice()
+	//ToDo: check arg length
+
+	qs := args[0]
+	results, err := client.Search(ctx, qs, spotify.SearchTypeArtist)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Searched Artist info:")
+	for _, item := range results.Artists.Artists {
+		if item.Name == qs {
+			fmt.Println("    ID: ", item.ID)
+			fmt.Println("    Name: ", item.Name)
+			fmt.Println("    Genre: ", item.Genres)
+		}
+	}
+	return nil
 }
