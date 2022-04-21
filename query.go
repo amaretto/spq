@@ -40,7 +40,6 @@ func executeQuery(c *cli.Context) error {
 
 	var results *spotify.SearchResult
 
-	// ToDo change kind by specified command
 	if c.Command.Name == "artist" {
 		results, err = client.Search(ctx, qs, spotify.SearchTypeArtist)
 		if err != nil {
@@ -71,4 +70,17 @@ func executeQuery(c *cli.Context) error {
 
 	}
 	return nil
+}
+
+func listArtist(client spotify.Client, qs string) {
+	ctx := context.Background()
+	results, err := client.Search(ctx, qs, spotify.SearchTypeArtist)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Artists:")
+	for _, item := range results.Artists.Artists {
+		fmt.Println("    ", item.Name)
+	}
+
 }

@@ -9,13 +9,13 @@ var commands = []*cli.Command{
 }
 
 var searchArtists = &cli.Command{
-	Name:   "artist",
-	Usage:  "search artist by keyword",
-	Action: executeQuery,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
+	Name:  "artist",
+	Usage: "search artist by keyword",
+	Subcommands: []*cli.Command{
+		{
+			Name:   "list",
+			Usage:  "list search results",
+			Action: listQuery,
 		},
 	},
 }
