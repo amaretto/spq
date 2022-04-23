@@ -114,3 +114,48 @@ func describeArtist(c *cli.Context) error {
 	}
 	return nil
 }
+
+func listAlbum(c *cli.Context) error {
+	ctx := context.Background()
+	if err := getClient(); err != nil {
+		return err
+	}
+	var args = c.Args().Slice()
+	//ToDo: check arg length
+
+	qs := args[0]
+	results, err := client.Search(ctx, qs, spotify.SearchTypeAlbum)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Albums:")
+	for _, item := range results.Albums.Albums {
+		fmt.Println("    ", item.Name)
+	}
+	return nil
+}
+
+func describeAlbum(c *cli.Context) error {
+	ctx := context.Background()
+	if err := getClient(); err != nil {
+		return err
+	}
+	var args = c.Args().Slice()
+	//ToDo: check arg length
+
+	qs := args[0]
+	results, err := client.Search(ctx, qs, spotify.SearchTypeAlbum)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Searched Album info:")
+	for _, item := range results.Albums.Albums {
+		if item.Name == qs {
+			fmt.Println("    ID: ", item.ID)
+			fmt.Println("    Name: ", item.Name)
+			fmt.Println("    Artists: ", item.Artists)
+			fmt.Println("    ReleaseDate: ", item.ReleaseDate)
+		}
+	}
+	return nil
+}

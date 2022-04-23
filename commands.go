@@ -26,13 +26,18 @@ var searchArtists = &cli.Command{
 }
 
 var searchAlbums = &cli.Command{
-	Name:   "album",
-	Usage:  "search album by keyword",
-	Action: executeQuery,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
+	Name:  "album",
+	Usage: "search album by keyword",
+	Subcommands: []*cli.Command{
+		{
+			Name:   "list",
+			Usage:  "list search results",
+			Action: listAlbum,
+		},
+		{
+			Name:   "describe",
+			Usage:  "list search results",
+			Action: describeAlbum,
 		},
 	},
 }
