@@ -38,18 +38,41 @@ var searchAlbums = &cli.Command{
 			Name:   "describe",
 			Usage:  "list search results",
 			Action: describeAlbum,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "format",
+					Aliases: []string{"f"},
+				},
+			},
 		},
 	},
 }
 
 var searchTracks = &cli.Command{
-	Name:   "track",
-	Usage:  "search track by keyword",
-	Action: executeQuery,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
+	Name:  "track",
+	Usage: "search track by keyword",
+	Subcommands: []*cli.Command{
+		{
+			Name:   "list",
+			Usage:  "list search results",
+			Action: listTrack,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "format",
+					Aliases: []string{"f"},
+				},
+			},
+		},
+		{
+			Name:   "describe",
+			Usage:  "list search results",
+			Action: describeTrack,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "format",
+					Aliases: []string{"f"},
+				},
+			},
 		},
 	},
 }
