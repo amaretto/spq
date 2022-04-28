@@ -1,0 +1,2 @@
+[for s in data.spotify_search_track.{album_resource_name}.tracks : s.id if s.name == "{track_name}"],
+

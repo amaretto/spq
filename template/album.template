@@ -1,0 +1,4 @@
+data "spotify_search_track" "{album_resource_name}" {
+  artist = "{artist_name}"
+  album  = "{album_name}"
+}
